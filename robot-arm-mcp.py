@@ -1,5 +1,6 @@
 #!/usr/bin/python
-
+# -*- coding: utf-8 -*-
+__author__ = 'Martijn van Leeuwen'
 # Copyright 2015 Martijn van Leeuwen, VOC Vanleeuwen Opensource Consultancy, The Netherlands
 
 # Control inteface for the IWO-538
@@ -11,6 +12,11 @@
 # To get enough, or use an IO extender.
 # Current ToDo:
 # Implement a MCP23008 or MCP23017.
+#
+# As there is not enough power to supply more then 2 motors at the same time, its best to use one motor at a time
+# To prevent using multiple motors by default, a failsafe is build in.
+# This failsave can be overridden by setting the FAILSAVE variable to False.
+#
 
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -26,6 +32,8 @@ import RPi.GPIO as io
 io.setmode(io.BCM)
 import sys, tty, termios, time
 from termcolor import colored, cprint
+
+VERSION = "0.2.0"
 
 # Settings for the MCP230017
 MCP23017_IODIRA = 0x00
@@ -197,6 +205,11 @@ motor5_in2_pin = 11
 led1_pin = 0
 led2_pin = 15
 
+FAILSAVE = True # Set to False to allow the use of more then one motor at the same time.
+# Warning: This might burn out your Pi and or MCP as you will need to make sure there is 
+#           enough power available to handle this.
+#           Common errors include the total freeze of the Raspberry PI.
+
 # Setup Pins
 mcp.config(motor1_in1_pin, mcp.OUTPUT)
 mcp.config(motor1_in2_pin, mcp.OUTPUT)
@@ -214,6 +227,8 @@ mcp.config(led1_pin, mcp.OUTPUT)
 mcp.config(led2_pin, mcp.OUTPUT)
 mcp.output(led1_pin, False)
 mcp.output(led2_pin, False)
+
+MotorActive = False
 
 #Define input
 def getch():
@@ -287,17 +302,27 @@ def motor5_stop():
     mcp.output(motor5_in1_pin, False)
     mcp.output(motor5_in2_pin, False)
 
+def motors_stop():
+  global MotorActive
+  mcp.output(motor1_in1_pin, False)
+  mcp.output(motor1_in2_pin, False)
+  mcp.output(motor2_in1_pin, False)
+  mcp.output(motor2_in2_pin, False)
+  mcp.output(motor3_in1_pin, False)
+  mcp.output(motor3_in2_pin, False)
+  mcp.output(motor4_in1_pin, False)
+  mcp.output(motor4_in2_pin, False)
+  mcp.output(motor5_in1_pin, False)
+  mcp.output(motor5_in2_pin, False)
+  MotorActive = False
+
 def toggleLights():
     global lightStatus
     if(lightStatus == False):
-#        io.output(18, True)
-#        io.output(23, True)
       mcp.output(led1_pin, True)
       mcp.output(led2_pin, True)
       lightStatus = True
     else:
-#        io.output(18, False)
-#        io.output(23, False)
       mcp.output(led1_pin, False)
       mcp.output(led2_pin, False)
       lightStatus = False
@@ -309,17 +334,21 @@ def togglearm(direction):
     if(arm1Status == "center"):
       motor2_forward()
       arm1Status = "forward"
+      MotorActive = True
     elif(arm1Status == "backward"):
       motor2_stop()
       arm1Status = "center"
+      MotorActive = False
 
   if(direction == "backward"):
     if(arm1Status == "center"):
       motor2_reverse()
       arm1Status = "backward"
+      MotorActive = True
     elif(arm1Status == "forward"):
       motor2_stop()
       arm1Status = "center"
+      MotorActive = False
 
 def togglearm2(direction):
   global arm2Status
@@ -328,17 +357,21 @@ def togglearm2(direction):
     if(arm2Status == "center"):
       motor3_forward()
       arm2Status = "forward"
+      MotorActive = True
     elif(arm2Status == "backward"):
       motor3_stop()
       arm2Status = "center"
+      MotorActive = False
 
   if(direction == "backward"):
     if(arm2Status == "center"):
       motor3_reverse()
       arm2Status = "backward"
+      MotorActive = True
     elif(arm2Status == "forward"):
       motor3_stop()
       arm2Status = "center"
+      MotorActive = False
 
 def togglearm3(direction):
   global arm3Status
@@ -347,17 +380,21 @@ def togglearm3(direction):
     if(arm3Status == "center"):
       motor4_forward()
       arm3Status = "forward"
+      MotorActive = True
     elif(arm3Status == "backward"):
       motor4_stop()
       arm3Status = "center"
+      MotorActive = False
 
   if(direction == "backward"):
     if(arm3Status == "center"):
       motor4_reverse()
       arm3Status = "backward"
+      MotorActive = True
     elif(arm3Status == "forward"):
       motor4_stop()
       arm3Status = "center"
+      MotorActive = False
 
 def togglearm4(direction):
   global clawStatus
@@ -366,17 +403,21 @@ def togglearm4(direction):
     if(clawStatus == "center"):
       motor5_forward()
       clawStatus = "forward"
+      MotorActive = True
     elif(clawStatus == "backward"):
       motor5_stop()
       clawStatus = "center"
+      MotorActive = False
 
   if(direction == "backward"):
     if(clawStatus == "center"):
       moor5_reverse()
       clawStatus = "backward"
+      MotorActive = True
     elif(clawStatus == "forward"):
       motor5_stop()
       clawStatus = "center"
+      MotorActive = False
 
 def toggleSteering(direction):
     global wheelStatus
@@ -385,30 +426,35 @@ def toggleSteering(direction):
         if(wheelStatus == "center"):
             motor1_reverse()
             wheelStatus = "right"
+            MotorActive = True
         elif(wheelStatus == "left"):
             motor1_stop()
             wheelStatus = "center"
+            MotorActive = False
 
     if(direction == "left"):
         if(wheelStatus == "center"):
             motor1_forward()
             wheelStatus = "left"
+            MotorActive = True
         elif(wheelStatus == "right"):
             motor1_stop()
             wheelStatus = "center"
+            MotorActive = False
 
 # Main
 if __name__ == '__main__':
-  mcp.output(motor1_in1_pin, False)
-  mcp.output(motor1_in2_pin, False)
-  mcp.output(motor2_in1_pin, False)
-  mcp.output(motor2_in2_pin, False)
-  mcp.output(motor3_in1_pin, False)
-  mcp.output(motor3_in2_pin, False)
-  mcp.output(motor4_in1_pin, False)
-  mcp.output(motor4_in2_pin, False)
-  mcp.output(motor5_in1_pin, False)
-  mcp.output(motor5_in2_pin, False)
+#  mcp.output(motor1_in1_pin, False)
+#  mcp.output(motor1_in2_pin, False)
+#  mcp.output(motor2_in1_pin, False)
+#  mcp.output(motor2_in2_pin, False)
+#  mcp.output(motor3_in1_pin, False)
+#  mcp.output(motor3_in2_pin, False)
+#  mcp.output(motor4_in1_pin, False)
+#  mcp.output(motor4_in2_pin, False)
+#  mcp.output(motor5_in1_pin, False)
+#  mcp.output(motor5_in2_pin, False)
+  motors_stop()
   lightStatus = False
   wheelStatus = "center"
   arm1Status = "center"
@@ -421,14 +467,15 @@ if __name__ == '__main__':
   reset = "\033[0;0m"
   cprint("OWI-535 Robot Arm Conrole", 'blue')
   cprint("Found an MP23017 on address 0x20", 'blue')
+  print(" " + bold + "Version:" + reset + " : %s ", str(VERSION))
   print " " + bold + "w/s:" + reset + " arm back/forth"
   print " " + bold + "a/d:" + reset + " steer left/right"
   print " " + bold + "z/c:" + reset + " steer left/right"
   print " " + bold + "r/f:" + reset + " steer left/right"
   print " " + bold + "q/e:" + reset + " claw open/close"
   print " " + bold + "l  :" + reset + " lights"
+  print " " + bold + "h  :" + reset + " all stop"
   print " " + bold + "x  :" + reset + " exit app."
-#  print("p: General Info")
 
   while True:
     char = getch()
@@ -465,7 +512,14 @@ if __name__ == '__main__':
     if(char == "l"):
       toggleLights()
 
+    if(char == "h"):
+      motors_stop()
+
     if(char == "x"):
+      if (MotorActive == True):
+        motors_stop()
+      if (lightStatus == True):
+        toggleLights()
       cprint("Program Ended", 'red')
       break
     char = ""
