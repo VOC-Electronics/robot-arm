@@ -33,7 +33,7 @@ io.setmode(io.BCM)
 import sys, tty, termios, time
 from termcolor import colored, cprint
 
-VERSION = "0.2.0"
+VERSION = "0.2.1"
 
 # Settings for the MCP230017
 MCP23017_IODIRA = 0x00
@@ -470,8 +470,8 @@ if __name__ == '__main__':
   print(" " + bold + "Version:" + reset + " : %s ", str(VERSION))
   print " " + bold + "w/s:" + reset + " arm back/forth"
   print " " + bold + "a/d:" + reset + " steer left/right"
-  print " " + bold + "z/c:" + reset + " steer left/right"
-  print " " + bold + "r/f:" + reset + " steer left/right"
+  print " " + bold + "z/c:" + reset + " arm2 up/down"
+  print " " + bold + "r/f:" + reset + " arm3 up/down"
   print " " + bold + "q/e:" + reset + " claw open/close"
   print " " + bold + "l  :" + reset + " lights"
   print " " + bold + "h  :" + reset + " all stop"
