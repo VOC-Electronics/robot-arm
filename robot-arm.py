@@ -1,3 +1,8 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+__author__ = 'Martijn van Leeuwen'
+# Copyright 2015 Martijn van Leeuwen, VOC Vanleeuwen Opensource Consultancy, The Netherlands
+
 # Control inteface for the IWO-538
 # As there are 6 dc servo's
 # U need at least 3 L293D's to controle them
@@ -5,8 +10,19 @@
 # The Raspberry Pi has not enough GPIO ports by default.
 # So you need to solder some extra points on your pi.
 # To get enough, or use an IO extender.
-# Current ToDo:
-# Implement a MCP23008 or MCP23017.
+#
+# Current To Do:
+#
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 
 import RPi.GPIO as io
 io.setmode(io.BCM)
@@ -14,18 +30,30 @@ import sys, tty, termios, time
 from termcolor import colored, cprint
 
 #Setup the motors
+# Use Default Pin 0 if it's not in use.
 motor1_in1_pin = 17
 motor1_in2_pin = 4
 motor2_in1_pin = 24
 motor2_in2_pin = 25
 motor3_in1_pin = 22
 motor3_in2_pin = 27
+motor4_in1_pin = 0
+motor4_in1_pin = 0
+motor5_in2_pin = 0
+motor5_in2_pin = 0
+
+#Setup the pins.
 io.setup(motor1_in1_pin, io.OUT)
 io.setup(motor1_in2_pin, io.OUT)
 io.setup(motor2_in1_pin, io.OUT)
 io.setup(motor2_in2_pin, io.OUT)
 io.setup(motor3_in1_pin, io.OUT)
 io.setup(motor3_in2_pin, io.OUT)
+io.setup(motor4_in1_pin, io.OUT)
+io.setup(motor4_in2_pin, io.OUT)
+io.setup(motor5_in1_pin, io.OUT)
+io.setup(motor5_in2_pin, io.OUT)
+
 # LED setup
 io.setup(18, io.OUT)
 io.output(18, False)
@@ -79,6 +107,42 @@ def motor3_reverse():
 def motor3_stop():
     io.output(motor3_in1_pin, False)
     io.output(motor3_in2_pin, False)
+
+def motor4_forward():
+  io.output(motor4_in1_pin, True)
+  io.output(motor4_in2_pin, False)
+
+def motor4_reverse():
+  io.output(motor4_in1_pin, False)
+  io.output(motor4_in2_pin, True)
+
+def motor4_stop():
+  io.output(motor4_in1_pin, False)
+  io.output(motor4_in2_pin, False)
+
+def motor5_forward():
+  io.output(motor5_in1_pin, True)
+  io.output(motor5_in2_pin, False)
+
+def motor5_reverse():
+  io.output(motor5_in1_pin, False)
+  io.output(motor5_in2_pin, True)
+
+def motor5_stop():
+  io.output(motor5_in1_pin, False)
+  io.output(motor5_in2_pin, False)
+
+def motors_stop():
+  io.output(motor1_in1_pin, False)
+  io.output(motor1_in2_pin, False)
+  io.output(motor2_in1_pin, False)
+  io.output(motor2_in2_pin, False)
+  io.output(motor3_in1_pin, False)
+  io.output(motor3_in2_pin, False)
+  io.output(motor4_in1_pin, False)
+  io.output(motor4_in2_pin, False)
+  io.output(motor5_in1_pin, False)
+  io.output(motor5_in2_pin, False)
 
 def toggleLights():
     global lightStatus
@@ -149,15 +213,9 @@ def toggleSteering(direction):
             wheelStatus = "centre"
 
 # Main 
-io.output(motor1_in1_pin, False)
-io.output(motor1_in2_pin, False)
-io.output(motor2_in1_pin, False)
-io.output(motor2_in2_pin, False)
-io.output(motor3_in1_pin, False)
-io.output(motor3_in2_pin, False)
+motors_stop()
 
 lightStatus = False
-
 wheelStatus = "centre"
 arm1Status = "center"
 arm2Status = "center"
@@ -167,10 +225,14 @@ clawStatus = "center"
 bold = "\033[1m"
 reset = "\033[0;0m"
 cprint("OWI-535 Robot Arm Conrole", 'blue')
-print " " +bold + "w/s:" +reset + " arm back/forth"
-print " " +bold + "a/d:" +reset + " steer left/right"
-print " " +bold + "z/c:" +reset + " steer left/right"
-print("l: lights")
+print " " + bold + "w/s:" + reset + " arm back/forth"
+print " " + bold + "a/d:" + reset + " steer left/right"
+print " " + bold + "z/c:" + reset + " arm2 up/down"
+print " " + bold + "r/f:" + reset + " arm3 up/down"
+print " " + bold + "q/e:" + reset + " claw open/close"
+print " " + bold + "l  :" + reset + " lights on/off"
+print " " + bold + "h  :" + reset + " all stop"
+print " " + bold + "x  :" + reset + " exit app."
 print("p: General Info")
 
 while True:
