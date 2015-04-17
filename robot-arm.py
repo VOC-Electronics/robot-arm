@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 __author__ = 'Martijn van Leeuwen'
 # Copyright 2015 Martijn van Leeuwen, VOC Vanleeuwen Opensource Consultancy, The Netherlands
-
+# 
+# Note: Motor 4 and 5 are not yet in use.
+#
 # Control inteface for the IWO-538
 # As there are 6 dc servo's
 # U need at least 3 L293D's to controle them
@@ -11,7 +13,7 @@ __author__ = 'Martijn van Leeuwen'
 # So you need to solder some extra points on your pi.
 # To get enough, or use an IO extender.
 #
-# Current To Do:
+# Current ToDo:
 #
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR

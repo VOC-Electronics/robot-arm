@@ -5,19 +5,21 @@ __author__ = 'Martijn van Leeuwen'
 
 # Control inteface for the IWO-538
 # As there are 6 dc servo's
-# U need at least 3 L293D's to controle them
+# You need at least 3 L293D's to controle them.
+# Make sure that the power supplied to the controlers is sufficient.
+# The 5V from the Raspberry Pi is not enough. You need external power.
+# A breadboard power unit is required.
+# An additional condensator would help do overcome any sudden powerloss.
 #
 # The Raspberry Pi has not enough GPIO ports by default.
 # So you need to solder some extra points on your pi.
 # To get enough, or use an IO extender.
 #
 # Current ToDo:
-# 
-# 
+#
 # As there is not enough power to supply more then 2 motors at the same time, its best to use one motor at a time
 # To prevent using multiple motors by default, a failsafe is build in.
 # This failsave can be overridden by setting the FAILSAVE variable to False.
-#
 #
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
@@ -34,7 +36,7 @@ io.setmode(io.BCM)
 import sys, tty, termios, time
 from termcolor import colored, cprint
 
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 
 # Settings for the MCP230017
 MCP23017_IODIRA = 0x00
