@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 __author__ = 'Martijn van Leeuwen'
+__description__ = ''
+
 # Copyright 2015 Martijn van Leeuwen, VOC Vanleeuwen Opensource Consultancy, The Netherlands
-# 
 # Note: Motor 4 and 5 are not yet in use.
 #
 # Control inteface for the IWO-538
@@ -25,11 +26,13 @@ __author__ = 'Martijn van Leeuwen'
 # SOFTWARE.
 
 
-
+import sys
+import tty
+import termios
+#import time
+from termcolor import colored, cprint
 import RPi.GPIO as io
 io.setmode(io.BCM)
-import sys, tty, termios, time
-from termcolor import colored, cprint
 
 #Setup the motors
 # Use Default Pin 0 if it's not in use.
@@ -40,8 +43,8 @@ motor2_in2_pin = 25
 motor3_in1_pin = 22
 motor3_in2_pin = 27
 motor4_in1_pin = 0
-motor4_in1_pin = 0
-motor5_in2_pin = 0
+motor4_in2_pin = 0
+motor5_in1_pin = 0
 motor5_in2_pin = 0
 
 #Setup the pins.
@@ -64,51 +67,51 @@ io.output(23, False)
 
 #Define input
 def getch():
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(sys.stdin.fileno())
-        ch = sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
-    return ch
+  fd = sys.stdin.fileno()
+  old_settings = termios.tcgetattr(fd)
+  try:
+    tty.setraw(sys.stdin.fileno())
+    ch = sys.stdin.read(1)
+  finally:
+    termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+  return ch
 
 # Define motor settings
 def motor1_forward():
-    io.output(motor1_in1_pin, True)
-    io.output(motor1_in2_pin, False)
+  io.output(motor1_in1_pin, True)
+  io.output(motor1_in2_pin, False)
 
 def motor1_reverse():
-    io.output(motor1_in1_pin, False)
-    io.output(motor1_in2_pin, True)
+  io.output(motor1_in1_pin, False)
+  io.output(motor1_in2_pin, True)
 
 def motor1_stop():
-    io.output(motor1_in1_pin, False)
-    io.output(motor1_in2_pin, False)
- 
+  io.output(motor1_in1_pin, False)
+  io.output(motor1_in2_pin, False)
+
 def motor2_forward():
-    io.output(motor2_in1_pin, True)
-    io.output(motor2_in2_pin, False)
+  io.output(motor2_in1_pin, True)
+  io.output(motor2_in2_pin, False)
 
 def motor2_reverse():
-    io.output(motor2_in1_pin, False)
-    io.output(motor2_in2_pin, True)
+  io.output(motor2_in1_pin, False)
+  io.output(motor2_in2_pin, True)
 
 def motor2_stop():
-    io.output(motor2_in1_pin, False)
-    io.output(motor2_in2_pin, False)
+  io.output(motor2_in1_pin, False)
+  io.output(motor2_in2_pin, False)
 
 def motor3_forward():
-    io.output(motor3_in1_pin, True)
-    io.output(motor3_in2_pin, False)
+  io.output(motor3_in1_pin, True)
+  io.output(motor3_in2_pin, False)
 
 def motor3_reverse():
-    io.output(motor3_in1_pin, False)
-    io.output(motor3_in2_pin, True)
+  io.output(motor3_in1_pin, False)
+  io.output(motor3_in2_pin, True)
 
 def motor3_stop():
-    io.output(motor3_in1_pin, False)
-    io.output(motor3_in2_pin, False)
+  io.output(motor3_in1_pin, False)
+  io.output(motor3_in2_pin, False)
 
 def motor4_forward():
   io.output(motor4_in1_pin, True)
@@ -147,15 +150,15 @@ def motors_stop():
   io.output(motor5_in2_pin, False)
 
 def toggleLights():
-    global lightStatus
-    if(lightStatus == False):
-        io.output(18, True)
-        io.output(23, True)
-        lightStatus = True
-    else:
-        io.output(18, False)
-        io.output(23, False)
-        lightStatus = False
+  global lightStatus
+  if(lightStatus == False):
+    io.output(18, True)
+    io.output(23, True)
+    lightStatus = True
+  else:
+    io.output(18, False)
+    io.output(23, False)
+    lightStatus = False
 
 def togglearm(direction):
   global arm1Status
@@ -239,30 +242,31 @@ print("p: General Info")
 
 while True:
   char = getch()
-  if(char == "w"):
+  if char == "w":
     togglearm("forward")
 
-  if(char == "s"):
+  if char == "s":
     togglearm("backward")
 
-  if(char == "d"):
+  if char == "d":
     toggleSteering("left")
 
-  if(char == "a"):
+  if char == "a":
     toggleSteering("right")
 
-  if(char == "z"):
+  if char == "z":
     togglearm2("forward")
 
-  if(char == "c"):
+  if char == "c":
     togglearm2("backward")
 
-  if(char == "l"):
+  if char == "l":
     toggleLights()
 
-  if(char == "x"):
+  if char == "x":
     cprint("Program Ended", 'red')
     break
+
   char = ""
 
 io.cleanup()
